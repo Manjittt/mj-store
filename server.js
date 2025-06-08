@@ -3,9 +3,9 @@ import colors from "colors";
 import dotenv from "dotenv"
 import morgan from "morgan";
 import connectDB from "./config/db.js";
-import authRoutes from './Route/authRoutes.js'
-import categoryRoutes from './Route/categoryRoutes.js'
-import productRoutes from './Route/productRoutes.js'
+import authRoutes from './route/authRoutes.js'
+import categoryRoutes from './route/categoryRoutes.js'
+import productRoutes from './route/productRoutes.js'
 import cors from 'cors'
 
 
