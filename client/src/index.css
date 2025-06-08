@@ -1,0 +1,75 @@
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+
+
+}
+
+/*Navbar css */
+.navbar{
+ font-family:'Courier New', Courier, monospace;
+ font-weight: 500;
+ font-size: 17px;
+ line-height: 26px;
+ text-transform: uppercase;
+ box-shadow: 0 8px 6px -6px burlywood;
+ border-bottom: 0.5px solid burlywood;
+}
+.link-nav{
+  font-weight: 200 !important; 
+
+}
+.active{
+  border-bottom: 2px solid;
+}
+.navbar-brand{
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: 900;
+ font-family: 'roboto', sans-serif;
+ letter-spacing: 3px;
+}
+.footer{
+  font-family: 'Courier New', Courier, monospace;
+  color: white;
+  padding: 25px;
+  background: #000000;
+  background: -webkit-linear-gradient(to right, 0#434343, #000000);
+  background: linear-gradient (to right,口 #434343,•#000000);
+
+}
+.footer a{
+text-decoration: none;
+color: white;
+padding: 10px;
+}
+.footer a:hover{
+  color: white;
+  border-bottom: 1px solid #ffefba;
+
+}
+/*===============================================*/
+/*===============about us ====================*/
+.aboutus {
+  margin: 0;
+  padding: 0;
+  height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/*===============================================*/
+/*===============Register====================*/
+.register{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 70vh;
+  flex-direction: column;
+}
+/*============*/
+.product-link{
+  text-decoration: none;
+  color: #ffffff;
+  
+}
