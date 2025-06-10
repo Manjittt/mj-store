@@ -50,9 +50,8 @@ HomePage.css
     display: flex;
     flex-direction: column;
 }
-
 .product-image {
-    height: 220px;
+    height: 90%;
     object-fit: cover;
     border-bottom: 1px solid #eee;
     width: 100%;
