@@ -152,6 +152,11 @@ const HomePage = () => {
                       className="product-image"
                       alt={p.name}
                       loading="lazy"
+                             style={{
+                        maxHeight: "220px",
+                        objectFit: "contain",
+                        padding: "10px",
+                      }}
                     />
                     <div className="product-details">
                       <h5 className="product-title">{p.name}</h5>
