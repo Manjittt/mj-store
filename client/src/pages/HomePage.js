@@ -20,6 +20,9 @@ const HomePage = () => {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
 
+  // 1. Added state for mobile filter visibility
+  const [showFilter, setShowFilter] = useState(false);
+
   const getAllCategory = async () => {
     try {
       const { data } = await axios.get("/api/v1/category/get-category");
@@ -110,8 +113,18 @@ const HomePage = () => {
     <Layout title={"All Products - Best Offers"}>
       <div className="home-container mt-3">
         <div className="row">
-          {/* Sidebar Filters */}
-          <div className="col-md-2 filter-sidebar">
+          {/* 2. Enhanced Sidebar with dynamic class for mobile visibility */}
+          <div
+            className={`col-md-2 filter-sidebar ${showFilter ? "active" : ""}`}
+          >
+            <div className="d-flex justify-content-between align-items-center mb-3 d-md-none">
+              <h4>Filters</h4>
+              <button
+                className="btn-close"
+                onClick={() => setShowFilter(false)}
+              ></button>
+            </div>
+
             <h4>Filter by Category</h4>
             <div className="d-flex flex-column">
               {categories?.map((c) => (
@@ -141,8 +154,18 @@ const HomePage = () => {
             </button>
           </div>
 
-          {/* Product Listing */}
+          {/* Product Listing Area */}
           <div className="col-md-10 product-area">
+            {/* 3. Mobile Filter Button (Shows only on small screens) */}
+            <div className="mobile-filter-btn d-md-none mb-3 px-2">
+              <button
+                className="btn btn-outline-dark w-100"
+                onClick={() => setShowFilter(true)}
+              >
+                ☰ Filter Products
+              </button>
+            </div>
+
             <div className="product-list">
               {products.length > 0 ? (
                 products.map((p) => (
@@ -152,7 +175,7 @@ const HomePage = () => {
                       className="product-image"
                       alt={p.name}
                       loading="lazy"
-                             style={{
+                      style={{
                         maxHeight: "220px",
                         objectFit: "contain",
                         padding: "10px",
@@ -175,12 +198,14 @@ const HomePage = () => {
                           className="btn-add-cart"
                           onClick={() => {
                             setCart([...cart, p]);
-                            
-                            localStorage.setItem("cart", JSON.stringify([...cart, p]));
+                            localStorage.setItem(
+                              "cart",
+                              JSON.stringify([...cart, p])
+                            );
                             toast.success("Item added to cart");
                           }}
                         >
-                          ADD TO CART{" "}
+                          ADD TO CART
                         </button>
                       </div>
                     </div>
@@ -209,4 +234,5 @@ const HomePage = () => {
     </Layout>
   );
 };
+
 export default HomePage;
