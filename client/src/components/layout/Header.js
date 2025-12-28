@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { NavLink, Link } from "react-router-dom";
-import { HiMiniShoppingBag } from "react-icons/hi2";
+
 import { useAuth } from "../../context/auth";
 import toast from "react-hot-toast";
 import SearchInput from "../Form/SearchInput";

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+
 import useCategory from "../hooks/useCategory";
 import Layout from "../components/layout/Layout";
 import { Link } from "react-router-dom";
