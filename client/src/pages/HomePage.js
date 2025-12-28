@@ -111,6 +111,13 @@ const HomePage = () => {
 
   return (
     <Layout title={"All Products - Best Offers"}>
+      <h3
+        className="text-center"
+        style={{ fontFamily: "Georgia, serif", fontWeight: "700", padding: "10px" }}
+      >
+        All Products
+      </h3>
+
       <div className="home-container mt-3">
         <div className="row">
           {/* 2. Enhanced Sidebar with dynamic class for mobile visibility */}

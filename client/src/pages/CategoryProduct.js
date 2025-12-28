@@ -31,7 +31,6 @@ const CategoryProduct = () => {
     }
   };
 
-  // ✅ ADD TO CART (same as ProductDetails)
   const handleAddToCart = (product) => {
     const updatedCart = [...cart, product];
     setCart(updatedCart);
@@ -69,13 +68,27 @@ const CategoryProduct = () => {
             products.map((p) => (
               <div key={p._id} className="col-md-4 mb-4">
                 <div className="card h-100 shadow-sm">
+                  {/* ✅ FIXED IMAGE RATIO */}
                   {p?._id && (
-                    <img
-                      src={`/api/v1/product/product-photo/${p._id}`}
-                      className="card-img-top"
-                      alt={p?.name}
-                      style={{ height: "280px", objectFit: "cover" }}
-                    />
+                    <div
+                      style={{
+                        width: "100%",
+                        aspectRatio: "1 / 1",
+                        overflow: "hidden",
+                        backgroundColor: "#fff",
+                        borderBottom: "1px solid #eee",
+                      }}
+                    >
+                      <img
+                        src={`/api/v1/product/product-photo/${p._id}`}
+                        alt={p?.name}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "contain",
+                        }}
+                      />
+                    </div>
                   )}
 
                   <div className="card-body d-flex flex-column">
