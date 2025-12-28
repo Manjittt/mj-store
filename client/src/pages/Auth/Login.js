@@ -5,30 +5,24 @@ import { useNavigate, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import "../../styles/AuthStyles.css";
 import { useAuth } from "../../context/auth";
-import { FaUserPlus } from "react-icons/fa"; // Importing the icon
+import { FaUserPlus } from "react-icons/fa";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const { auth, setAuth } = useAuth();
+  const [, setAuth] = useAuth(); // ignore unused auth
 
   const navigate = useNavigate();
   const location = useLocation();
 
-  // form function
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const res = await axios.post("/api/v1/auth/login", {
-        email,
-        password,
-      });
-      
+      const res = await axios.post("/api/v1/auth/login", { email, password });
 
       if (res && res.data.success) {
-        toast.success(res.data && res.data.message);
+        toast.success(res.data.message);
         setAuth({
           user: res.data.user,
           token: res.data.token,
@@ -45,7 +39,7 @@ const Login = () => {
   };
 
   return (
-    <Layout title={"Login - E-Shopping App"}>
+    <Layout title="Login - E-Shopping App">
       <div className="form-container">
         <form onSubmit={handleSubmit}>
           <h4 className="title">LOGIN FORM</h4>
@@ -55,7 +49,6 @@ const Login = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="form-control"
-              id="emailInput"
               placeholder="Enter Your Email"
               required
             />
@@ -66,17 +59,14 @@ const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="form-control"
-              id="passwordInput"
               placeholder="Enter Your Password"
               required
             />
           </div>
           <button
             type="button"
-            className="btn btn-primary"
-            onClick={() => {
-              navigate("/forget-password");
-            }}
+            className="btn btn-primary me-2"
+            onClick={() => navigate("/forget-password")}
           >
             Forgot Password
           </button>
@@ -84,12 +74,11 @@ const Login = () => {
             LOGIN
           </button>
 
-          {/* Register Button with Icon */}
           <div className="mt-3">
             <button
               type="button"
               className="btn btn-link"
-              onClick={() => navigate("/register")} // Navigate to Register page
+              onClick={() => navigate("/register")}
             >
               <FaUserPlus /> New User? Please Register here
             </button>
