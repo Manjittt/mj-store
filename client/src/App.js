@@ -1,4 +1,6 @@
 import { Routes, Route } from "react-router-dom";
+import "@fortawesome/fontawesome-free/css/all.min.css";
+
 import HomePage from "./pages/HomePage";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -26,7 +28,7 @@ import ProductDetails from "./pages/ProductDetails";
 import Categories from "./pages/Categories";
 import CategoryProduct from "./pages/CategoryProduct";
 import CartPage from "./pages/CartPage";
-
+import AdminOrders from "./pages/Admin/AdminOrders";
 
 function App() {
   return (
@@ -53,6 +55,8 @@ function App() {
           <Route path="admin/product/:slug" element={<UpdateProduct />} />
           <Route path="admin/products" element={<Products />} />
           <Route path="admin/users" element={<User />} />
+          <Route path="admin/orders" element={<AdminOrders />} />
+        
         </Route>
         <Route path="/register" element={<Register />} />
         <Route path="/forget-password" element={<ForgotPassword />} />

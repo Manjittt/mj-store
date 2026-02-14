@@ -6,12 +6,12 @@ import { Checkbox, Radio } from "antd";
 import { prices } from "../components/Prices";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/cart";
-
 import "./HomePage.css";
 
 const HomePage = () => {
   const navigate = useNavigate();
   const { cart, setCart } = useCart();
+
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [checked, setChecked] = useState([]);
@@ -19,16 +19,12 @@ const HomePage = () => {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
-
-  // 1. Added state for mobile filter visibility
   const [showFilter, setShowFilter] = useState(false);
 
   const getAllCategory = async () => {
     try {
       const { data } = await axios.get("/api/v1/category/get-category");
-      if (data.success) {
-        setCategories(data.category);
-      }
+      if (data.success) setCategories(data.category);
     } catch (error) {
       console.log(error);
     }
@@ -47,8 +43,8 @@ const HomePage = () => {
     try {
       setLoading(true);
       const { data } = await axios.get(`/api/v1/product/product-list/${page}`);
-      setLoading(false);
       setProducts((prev) => [...prev, ...data.products]);
+      setLoading(false);
     } catch (error) {
       setLoading(false);
       console.log(error);
@@ -68,17 +64,9 @@ const HomePage = () => {
   };
 
   const handleFilter = (value, id) => {
-    let updatedChecked = [...checked];
-    if (value) {
-      updatedChecked.push(id);
-    } else {
-      updatedChecked = updatedChecked.filter((c) => c !== id);
-    }
-    setChecked(updatedChecked);
-  };
-
-  const handlePriceFilter = (e) => {
-    setRadio(e.target.value);
+    let updated = [...checked];
+    value ? updated.push(id) : (updated = updated.filter((c) => c !== id));
+    setChecked(updated);
   };
 
   const clearFilters = () => {
@@ -110,69 +98,77 @@ const HomePage = () => {
   }, [page]);
 
   return (
-    <Layout title={"All Products - Best Offers"}>
-      <h3
-        className="text-center"
-        style={{ fontFamily: "Georgia, serif", fontWeight: "700", padding: "10px" }}
+    <Layout title="All Products - Best Offers">
+      {/* ===== BANNER SLIDER (NEW) ===== */}
+      <div
+        id="homeBanner"
+        className="carousel slide mb-4 mx-auto banner-carousel"
+        data-bs-ride="carousel"
       >
-        All Products
-      </h3>
+        <div className="carousel-inner  ">
+          <div className="carousel-item active">
+            <img
+              src="https://cdn.shopify.com/s/files/1/0629/7252/6778/files/bop-qr-banner_600x600.jpg?v=1671263330 "
+              className="d-block w-100 banner-img"
+              alt="Banner 1"
+            />
+          </div>
+          <div className="carousel-item">
+            <img
+              src="https://m.media-amazon.com/images/S/aplus-media-library-service-media/d1895685-46e1-4da5-a761-36e1951b90c9.__CR0,0,970,300_PT0_SX970_V1___.jpg"
+              className="d-block w-100 banner-img"
+              alt="Banner 2"
+            />
+          </div>
+          <div className="carousel-item">
+            <img
+              src="https://www.thespruceeats.com/thmb/fLiRPJNTLyh596Z0hH2Sqv6gntY=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/SPE_SYS_MainBanner_Final-17a3970717244815b785f693fde69029.jpg"
+              className="d-block w-100 banner-img"
+              alt="Banner 3"
+            />
+          </div>
+        </div>
+      </div>
+–
+      <h3 className="text-center fw-bold mb-3">Our Products</h3> 
 
       <div className="home-container mt-3">
         <div className="row">
-          {/* 2. Enhanced Sidebar with dynamic class for mobile visibility */}
+          {/* FILTER SIDEBAR */}
           <div
             className={`col-md-2 filter-sidebar ${showFilter ? "active" : ""}`}
           >
-            <div className="d-flex justify-content-between align-items-center mb-3 d-md-none">
-              <h4>Filters</h4>
-              <button
-                className="btn-close"
-                onClick={() => setShowFilter(false)}
-              ></button>
-            </div>
-
             <h4>Filter by Category</h4>
-            <div className="d-flex flex-column">
-              {categories?.map((c) => (
-                <Checkbox
-                  key={c._id}
-                  onChange={(e) => handleFilter(e.target.checked, c._id)}
-                  checked={checked.includes(c._id)}
-                >
-                  {c.name}
-                </Checkbox>
-              ))}
-            </div>
+            {categories?.map((c) => (
+              <Checkbox
+                key={c._id}
+                checked={checked.includes(c._id)}
+                onChange={(e) => handleFilter(e.target.checked, c._id)}
+              >
+                {c.name}
+              </Checkbox>
+            ))}
 
             <h4 className="mt-4">Filter by Price</h4>
-            <div className="d-flex flex-column">
-              <Radio.Group onChange={handlePriceFilter} value={radio}>
-                {prices?.map((p) => (
-                  <div key={p._id}>
-                    <Radio value={p.array}>{p.name}</Radio>
-                  </div>
-                ))}
-              </Radio.Group>
-            </div>
+            <Radio.Group
+              onChange={(e) => setRadio(e.target.value)}
+              value={radio}
+            >
+              {prices.map((p) => (
+                <Radio key={p._id} value={p.array}>
+                  {p.name}
+                </Radio>
+              ))}
+            </Radio.Group>
 
             <button onClick={clearFilters} className="clear-filter-btn">
               Clear Filters
             </button>
           </div>
 
-          {/* Product Listing Area */}
+          {/* PRODUCT LIST */}
           <div className="col-md-10 product-area">
-            {/* 3. Mobile Filter Button (Shows only on small screens) */}
-            <div className="mobile-filter-btn d-md-none mb-3 px-2">
-              <button
-                className="btn btn-outline-dark w-100"
-                onClick={() => setShowFilter(true)}
-              >
-                ☰ Filter Products
-              </button>
-            </div>
-
+          
             <div className="product-list">
               {products.length > 0 ? (
                 products.map((p) => (
@@ -181,40 +177,36 @@ const HomePage = () => {
                       src={`/api/v1/product/product-photo/${p._id}`}
                       className="product-image"
                       alt={p.name}
-                      loading="lazy"
-                      style={{
-                        maxHeight: "220px",
-                        objectFit: "contain",
-                        padding: "10px",
-                      }}
                     />
+
                     <div className="product-details">
                       <h5 className="product-title">{p.name}</h5>
                       <p className="product-description">
                         {p.description.substring(0, 30)}...
                       </p>
                       <p className="product-price">₹{p.price}</p>
-                      <div className="product-actions">
-                        <button
-                          className="btn-details"
-                          onClick={() => navigate(`/product/${p.slug}`)}
-                        >
-                          VIEW DETAILS
-                        </button>
-                        <button
-                          className="btn-add-cart"
-                          onClick={() => {
-                            setCart([...cart, p]);
-                            localStorage.setItem(
-                              "cart",
-                              JSON.stringify([...cart, p])
-                            );
-                            toast.success("Item added to cart");
-                          }}
-                        >
-                          ADD TO CART
-                        </button>
-                      </div>
+
+                      {/* ✅ BUTTONS UNCHANGED */}
+                      <button
+                        className="btn-details "
+                        onClick={() => navigate(`/product/${p.slug}`)}
+                      >
+                        VIEW DETAILS
+                      </button>
+
+                      <button
+                        className="btn-add-cart mt-2"
+                        onClick={() => {
+                          setCart([...cart, p]);
+                          localStorage.setItem(
+                            "cart",
+                            JSON.stringify([...cart, p]),
+                          );
+                          toast.success("Item added to cart");
+                        }}
+                      >
+                        ADD TO CART
+                      </button>
                     </div>
                   </div>
                 ))
@@ -223,9 +215,8 @@ const HomePage = () => {
               )}
             </div>
 
-            {/* Load More Button */}
-            <div className="text-center mt-4">
-              {!checked.length && !radio.length && products.length < total && (
+            {!checked.length && !radio.length && products.length < total && (
+              <div className="text-center mt-4">
                 <button
                   className="load-more-btn mb-4"
                   onClick={() => setPage((prev) => prev + 1)}
@@ -233,8 +224,8 @@ const HomePage = () => {
                 >
                   {loading ? "Loading..." : "Load More.."}
                 </button>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

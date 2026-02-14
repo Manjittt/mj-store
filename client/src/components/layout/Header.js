@@ -53,7 +53,7 @@ const Header = () => {
         {/* 2. Brand on the right (mobile) / left (desktop) */}
         <Link
           to="/"
-          className="navbar-brand d-flex align-items-center gap-1 ms-auto ms-lg-0 order-lg-first"
+          className="navbar-brand d-flex align-items-center gap-1 ms-auto ms-lg-0 order-lg-first "
         >
           DESI SWAAD
         </Link>

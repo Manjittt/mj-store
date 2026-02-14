@@ -264,3 +264,20 @@ export const getOrdersController = async (req, res) => {
     });
   }
 };
+
+// get all users controller
+export const getAllUsersController = async (req, res) => {
+  try {
+    const users = await userModel.find({});
+    res.status(200).json({ success: true, users });
+  }
+  catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "Error While Getting Users",
+      error,
+    });
+  }
+}
+

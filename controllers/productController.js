@@ -3,21 +3,6 @@ import categoryModel from "../models/categoryModel.js";
 import orderModel from "../models/orderModel.js";
 import fs from "fs";
 import slugify from "slugify";
-import braintree from "braintree";
-import dotenv from "dotenv";
-
-
-// Initialize Braintree Gateway
-dotenv.config();
-
-const gateway = new braintree.BraintreeGateway({
-  environment: braintree.Environment.Sandbox,
-  merchantId: process.env.BRAINTREE_MERCHANT_ID,
-  publicKey: process.env.BRAINTREE_PUBLIC_KEY,
-  privateKey: process.env.BRAINTREE_PRIVATE_KEY,
-});
-
-
 
 
 export const createProductController = async (req, res) => {
@@ -247,7 +232,7 @@ try {
   // product list controller
   export const productListController = async (req,res)=>{
     try {
-      const perPage = 8;
+      const perPage = 10;
       const page = req.params.page ? req.params.page : 1;
       const products = await productModel
         .find({})
@@ -354,58 +339,5 @@ export const realtedProductController = async (req, res) => {
    }
  };
 
-// payment gateway api
-export const braintreeTokenController = async (req, res) => {
-  try {
-    gateway.clientToken.generate({}, function (err, response) {
-      if (err) {
-        res.status(500).send( err);
-      } else{
-        res.send(response);
-      }
-    });
-  } catch (error) {
-    console.log(error);
-  }
-};
 
-// Braintree payment controller
-export const braintreePaymentController = async (req, res) => {
-  try {
-    const { nonce, cart } = req.body;
-    let total = 0;
-    cart.forEach((item) => {
-      total += item.price;
-    });
-
-    gateway.transaction.sale(
-      {
-        amount: total,
-        paymentMethodNonce: nonce,
-        options: {
-          submitForSettlement: true,
-        },
-      },
-      async (err, result) => {
-        if (err || !result.success) {
-          console.log("Braintree transaction error:", err || result.message);
-          return res
-            .status(500)
-            .send({ success: false, message: err || result.message });
-        }
-
-        await new orderModel({
-          products: cart,
-          payment: result,
-          buyer: req.user._id,
-        }).save();
-
-        res.json({ success: true });
-      }
-    );
-  } catch (error) {
-    console.log("Payment server error:", error);
-    res.status(500).send({ success: false, message: "Server error" });
-  }
-};
 

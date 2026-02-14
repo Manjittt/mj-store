@@ -10,7 +10,7 @@ import { FaUserPlus } from "react-icons/fa";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [, setAuth] = useAuth(); // ignore unused auth
+  const { setAuth } = useAuth(); // ✅ object destructuring
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -19,15 +19,28 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const res = await axios.post("/api/v1/auth/login", { email, password });
+      const res = await axios.post("/api/v1/auth/login", {
+        email,
+        password,
+      });
 
-      if (res && res.data.success) {
+      if (res.data.success) {
         toast.success(res.data.message);
+
         setAuth({
           user: res.data.user,
           token: res.data.token,
         });
-        localStorage.setItem("auth", JSON.stringify(res.data));
+
+        // ✅ correct storage format
+        localStorage.setItem(
+          "auth",
+          JSON.stringify({
+            user: res.data.user,
+            token: res.data.token,
+          }),
+        );
+
         navigate(location.state || "/");
       } else {
         toast.error(res.data.message);
@@ -43,6 +56,7 @@ const Login = () => {
       <div className="form-container">
         <form onSubmit={handleSubmit}>
           <h4 className="title">LOGIN FORM</h4>
+
           <div className="mb-3">
             <input
               type="email"
@@ -53,6 +67,7 @@ const Login = () => {
               required
             />
           </div>
+
           <div className="mb-3">
             <input
               type="password"
@@ -63,6 +78,7 @@ const Login = () => {
               required
             />
           </div>
+
           <button
             type="button"
             className="btn btn-primary me-2"
@@ -70,6 +86,7 @@ const Login = () => {
           >
             Forgot Password
           </button>
+
           <button type="submit" className="btn btn-primary">
             LOGIN
           </button>

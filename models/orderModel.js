@@ -11,7 +11,7 @@ const orderSchema = new mongoose.Schema(
     payment: {},
     buyer: {
       type: mongoose.ObjectId,
-      ref: "users",
+      ref: "Users",
     },
     status: {
       type: String,
@@ -19,7 +19,7 @@ const orderSchema = new mongoose.Schema(
       enum: ["Not Process", "Processing", "Shipped", "deliverd", "cancel"],
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.model("Order", orderSchema);

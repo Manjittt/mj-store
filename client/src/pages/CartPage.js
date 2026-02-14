@@ -11,34 +11,35 @@ const CartPage = () => {
   const { auth } = useAuth();
   const { cart, setCart } = useCart();
   const navigate = useNavigate();
+
   const [clientToken, setClientToken] = useState("");
-  const [instance, setInstance] = useState("");
+  const [instance, setInstance] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Get payment getway Token
+  // Fetch Braintree client token from backend
   const getToken = async () => {
     try {
-      const { data } = await axios.get("/api/v1/product/braintree/token");
+      const { data } = await axios.get("/api/v1/payment/braintree/token", {
+        headers: { Authorization: `Bearer ${auth?.token}` },
+      });
+      console.log("Client token fetched:", data);
       setClientToken(data?.clientToken);
     } catch (error) {
-      console.error("Token fetch error:", error);
+      console.error("Token fetch error:", error.response || error);
+      toast.error("Unable to get payment token");
     }
   };
 
   useEffect(() => {
-    getToken();
+    if (auth?.token) getToken();
   }, [auth?.token]);
 
   // Remove item from cart
   const removeCartItem = (pid) => {
-    try {
-      const updatedCart = cart.filter((item) => item._id !== pid);
-      setCart(updatedCart);
-      localStorage.setItem("cart", JSON.stringify(updatedCart));
-      toast.success("Item removed from cart");
-    } catch (error) {
-      console.error("Remove item error:", error);
-    }
+    const updatedCart = cart.filter((item) => item._id !== pid);
+    setCart(updatedCart);
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+    toast.success("Item removed from cart");
   };
 
   // Calculate total price
@@ -46,35 +47,43 @@ const CartPage = () => {
     .reduce((acc, item) => acc + Number(item.price || 0), 0)
     .toFixed(2);
 
-  // Handle Payment
+  // Handle payment
   const handlePayment = async () => {
+    if (!instance) return toast.error("Payment not ready. Try again.");
+
     try {
       setLoading(true);
-      console.log("DropIn Instance:", instance); // Check if it's set
-      const { nonce } = await instance.requestPaymentMethod(); // This line may throw
-      console.log("Got nonce:", nonce);
 
-      const { data } = await axios.post("/api/v1/product/braintree/payment", {
-        nonce,
-        cart,
-      });
+      const paymentMethod = await instance.requestPaymentMethod();
+      const nonce = paymentMethod.nonce;
+      console.log("Payment nonce:", nonce);
 
-      if (data.success) {
+      const { data } = await axios.post(
+        "/api/v1/payment/braintree/payment",
+        { nonce, cart },
+        { headers: { Authorization: `Bearer ${auth?.token}` } },
+      );
+
+      console.log("Payment response:", data);
+
+      if (data?.success) {
         setCart([]);
         localStorage.removeItem("cart");
         toast.success("Payment successful!");
         navigate("/dashboard/user/orders");
       } else {
-        toast.error(data.message || "Payment failed. Please try again.");
+        toast.error(data?.message || "Payment failed. Please try again.");
       }
     } catch (error) {
-      console.error("Payment error:", error); // <--- log this
-      toast.error("An error occurred while processing your payment.");
+      console.error("Payment error:", error.response || error);
+      toast.error(
+        error.response?.data?.message ||
+          "An error occurred while processing payment.",
+      );
     } finally {
       setLoading(false);
     }
   };
-  
 
   return (
     <Layout>
@@ -187,23 +196,24 @@ const CartPage = () => {
               )}
 
               {/* Payment */}
-              <div className="mt-2">
-                <DropIn
-                  options={{
-                    authorization: clientToken,
-                    paypal: { flow: "vault" },
-                  }}
-                  onInstance={(inst) => {
-                    console.log("Braintree instance received:", inst);
-                    setInstance(inst);
-                  }}
-                />
+              <div className="mt-3">
+                {clientToken ? (
+                  <DropIn
+                    options={{
+                      authorization: clientToken,
+                      paypal: { flow: "vault" },
+                    }}
+                    onInstance={(inst) => setInstance(inst)}
+                  />
+                ) : (
+                  <p>Loading payment options...</p>
+                )}
 
                 <button
-                  className="btn btn-primary"
+                  className="btn btn-primary w-100 mt-3"
                   onClick={handlePayment}
                   disabled={
-                    !clientToken || loading || instance || !auth?.user?.address
+                    !clientToken || loading || !instance || !auth?.user?.address
                   }
                 >
                   {loading ? "Processing..." : "Make Payment"}
@@ -216,4 +226,5 @@ const CartPage = () => {
     </Layout>
   );
 };
+
 export default CartPage;

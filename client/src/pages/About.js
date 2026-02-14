@@ -1,13 +1,16 @@
 import React from "react";
 import Layout from "../components/layout/Layout";
+import logo from "../assets/Logo.png";
+
+
 
 const About = () => {
   return (
-    <Layout title="About us - Ecommerce app">
+    <Layout title="About us - Sudh Swaad">
       <div
         className="container"
         style={{
-          backgroundColor: "#f8f9fa",
+          backgroundColor: "#fff7f0",
           minHeight: "77vh",
           display: "flex",
           alignItems: "center",
@@ -19,8 +22,8 @@ const About = () => {
           {/* Image Section */}
           <div className="col-md-6 mb-4 mb-md-0">
             <img
-              src="https://static.vecteezy.com/system/resources/previews/039/322/213/non_2x/call-center-worker-using-headset-in-modern-office-receive-calls-from-clients-in-front-of-the-computer-woman-with-phone-calling-to-customer-support-service-concept-flat-illustration-vector.jpg"
-              alt="About us"
+              src={logo}
+              alt="Sudh Swaad Homemade Snacks"
               style={{
                 width: "100%",
                 maxWidth: "500px",
@@ -37,11 +40,11 @@ const About = () => {
               style={{
                 fontSize: "2.2rem",
                 fontWeight: "700",
-                color: "#333",
+                color: "#d35400",
                 marginBottom: "20px",
               }}
             >
-              Welcome to E-Shopping
+              Welcome to Sudh Swaad
             </h2>
             <p
               style={{
@@ -51,10 +54,10 @@ const About = () => {
                 marginBottom: "15px",
               }}
             >
-              E-Shopping is your one-stop online store, offering a wide range of
-              high-quality products at unbeatable prices. From fashion to
-              electronics and home essentials, we make shopping easy, fast, and
-              convenient.
+              Sudh Swaad brings you the finest homemade snacks made with love
+              and the freshest ingredients. From crispy gujiyas and salted
+              peanuts to crunchy maakhana, every bite is a taste of tradition
+              and care.
             </p>
             <p
               style={{
@@ -63,10 +66,11 @@ const About = () => {
                 color: "#555",
               }}
             >
-              <strong>Why E-Shopping?</strong> We’re committed to providing a
-              seamless shopping experience with secure payment options, fast
-              shipping, and hassle-free returns. Our carefully curated selection
-              ensures you get the best products every time.
+              <strong>Why choose Sudh Swaad?</strong> We are dedicated to
+              delivering authentic flavors with quality you can trust. Enjoy
+              freshly prepared snacks, made in small batches, with secure
+              delivery to your doorstep. Experience homemade goodness in every
+              bite!
             </p>
           </div>
         </div>
