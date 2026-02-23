@@ -13,6 +13,7 @@
     background-color: #ffffff;
     border-right: 1px solid #ddd;
     min-height: 100vh;
+    color: orange;
 }
 
 .filter-header {
@@ -30,7 +31,7 @@
 .clear-filter-btn {
     margin-top: 15px;
     padding: 10px;
-    background-color: #000;
+    background-color: orange;
     border: none;
     border-radius: 6px;
     color: white;
@@ -96,7 +97,7 @@
 .product-title {
     font-size: 1.05rem;
     font-weight: bold;
-    color: #333;
+    color:orange;
 }
 
 .product-description {
@@ -120,14 +121,14 @@
 .btn-details {
     padding: 10px;
     border-radius: 6px;
-    border: 1px solid #007bff;
+    border: 1px solid orange;
     background-color: white;
-    color: #007bff;
+    color: orange;
     font-weight: 600;
 }
 
 .btn-details:hover {
-    background-color: #007bff;
+    background-color:orange;
     color: #fff;
 }
 
@@ -135,7 +136,7 @@
     padding: 10px;
     border-radius: 6px;
     border: none;
-    background-color: #000;
+    background-color: orange;
     color: #fff;
     font-weight: 600;
 }
@@ -149,7 +150,7 @@
 .load-more-btn {
     padding: 12px 25px;
     font-size: 1rem;
-    background-color: #ffc107;
+    background-color:orange;
     border: none;
     border-radius: 8px;
     font-weight: 600;

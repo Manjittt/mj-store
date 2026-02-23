@@ -9,35 +9,38 @@ const AuthProvider = ({ children }) => {
     token: "",
   });
 
-  // Load auth from localStorage on first render
+  const [loading, setLoading] = useState(true); // ⭐ important
+
+  // Load auth from localStorage
   useEffect(() => {
     const data = localStorage.getItem("auth");
     if (data) {
       const parsedData = JSON.parse(data);
-      setAuth({
-        user: parsedData.user,
-        token: parsedData.token,
-      });
+      setAuth(parsedData);
+
+      // Set axios header immediately
+      axios.defaults.headers.common["Authorization"] =
+        `Bearer ${parsedData.token}`;
     }
+    setLoading(false);
   }, []);
 
-  // Set auth token in axios headers when it changes
+  // Update axios header when token changes
   useEffect(() => {
     if (auth?.token) {
-      axios.defaults.headers.common["Authorization"] = auth.token;
+      axios.defaults.headers.common["Authorization"] = `Bearer ${auth.token}`;
     } else {
       delete axios.defaults.headers.common["Authorization"];
     }
   }, [auth?.token]);
 
   return (
-    <AuthContext.Provider value={{ auth, setAuth }}>
+    <AuthContext.Provider value={{ auth, setAuth, loading }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Custom hook to use auth context
 const useAuth = () => useContext(AuthContext);
 
 export { useAuth, AuthProvider };

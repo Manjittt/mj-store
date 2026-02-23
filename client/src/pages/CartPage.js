@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useCart } from "../context/cart";
 import { useAuth } from "../context/auth";
 import Layout from "../components/layout/Layout";
@@ -13,20 +13,34 @@ const CartPage = () => {
   const navigate = useNavigate();
 
   const [clientToken, setClientToken] = useState("");
-  const [instance, setInstance] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("online");
+  const [showAddress, setShowAddress] = useState(false);
 
-  // Fetch Braintree client token from backend
+  const instanceRef = useRef(null);
+
+  const [deliveryAddress, setDeliveryAddress] = useState({
+    fullName: "",
+    phone: "",
+    email: "",
+    area: "",
+    landmark: "",
+    city: "",
+    state: "",
+    pincode: "",
+  });
+
   const getToken = async () => {
     try {
-      const { data } = await axios.get("/api/v1/payment/braintree/token", {
-        headers: { Authorization: `Bearer ${auth?.token}` },
-      });
-      console.log("Client token fetched:", data);
-      setClientToken(data?.clientToken);
+      const { data } = await axios.get(
+        "http://localhost:8080/api/v1/payment/braintree/token",
+        {
+          headers: { Authorization: `Bearer ${auth?.token}` },
+        }
+      );
+      if (data?.success) setClientToken(data.clientToken);
     } catch (error) {
-      console.error("Token fetch error:", error.response || error);
-      toast.error("Unable to get payment token");
+      toast.error("Unable to load payment system");
     }
   };
 
@@ -34,52 +48,85 @@ const CartPage = () => {
     if (auth?.token) getToken();
   }, [auth?.token]);
 
-  // Remove item from cart
   const removeCartItem = (pid) => {
     const updatedCart = cart.filter((item) => item._id !== pid);
     setCart(updatedCart);
     localStorage.setItem("cart", JSON.stringify(updatedCart));
-    toast.success("Item removed from cart");
+    toast.success("Item removed");
   };
 
-  // Calculate total price
   const totalPrice = cart
     .reduce((acc, item) => acc + Number(item.price || 0), 0)
     .toFixed(2);
 
-  // Handle payment
+  const validateAddress = () => {
+    const required = [
+      "fullName",
+      "phone",
+      "email",
+      "area",
+      "city",
+      "state",
+      "pincode",
+    ];
+    for (let field of required) {
+      if (!deliveryAddress[field]) {
+        toast.error("Please fill complete delivery address");
+        return false;
+      }
+    }
+    return true;
+  };
+
   const handlePayment = async () => {
-    if (!instance) return toast.error("Payment not ready. Try again.");
+    if (!auth?.token) return navigate("/login");
+    if (!validateAddress()) return;
+    if (!instanceRef.current) return toast.error("Payment system loading");
 
     try {
       setLoading(true);
-
-      const paymentMethod = await instance.requestPaymentMethod();
-      const nonce = paymentMethod.nonce;
-      console.log("Payment nonce:", nonce);
+      const { nonce } = await instanceRef.current.requestPaymentMethod();
 
       const { data } = await axios.post(
-        "/api/v1/payment/braintree/payment",
-        { nonce, cart },
-        { headers: { Authorization: `Bearer ${auth?.token}` } },
+        "http://localhost:8080/api/v1/payment/braintree/payment",
+        { nonce, cart, address: deliveryAddress },
+        { headers: { Authorization: `Bearer ${auth?.token}` } }
       );
-
-      console.log("Payment response:", data);
 
       if (data?.success) {
         setCart([]);
         localStorage.removeItem("cart");
-        toast.success("Payment successful!");
+        toast.success("Payment Successful 🎉");
         navigate("/dashboard/user/orders");
-      } else {
-        toast.error(data?.message || "Payment failed. Please try again.");
-      }
+      } else toast.error(data?.message);
     } catch (error) {
-      console.error("Payment error:", error.response || error);
-      toast.error(
-        error.response?.data?.message ||
-          "An error occurred while processing payment.",
+      toast.error("Payment failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCODPayment = async () => {
+    if (!auth?.token) return navigate("/login");
+    if (!validateAddress()) return;
+
+    try {
+      setLoading(true);
+
+      const { data } = await axios.post(
+        "http://localhost:8080/api/v1/payment/cod/payment",
+        { cart, address: deliveryAddress },
+        { headers: { Authorization: `Bearer ${auth?.token}` } }
       );
+
+      if (data?.success) {
+        setCart([]);
+        localStorage.removeItem("cart");
+        toast.success("Order Placed 🎉");
+        navigate("/dashboard/user/orders");
+      } else toast.error(data?.message);
+    } catch (error) {
+      toast.error("COD order failed");
     } finally {
       setLoading(false);
     }
@@ -87,138 +134,179 @@ const CartPage = () => {
 
   return (
     <Layout>
-      <div className="container py-4">
-        <div className="row">
-          <div className="col-md-12 text-center mb-4">
-            <h1 style={{ fontSize: "2rem", fontWeight: 600 }}>
-              Hello {auth?.user?.name || "Guest"}
-            </h1>
-            <h4 className="text-secondary">
-              {cart.length > 0
-                ? `You have ${cart.length} item(s) in your cart`
-                : "Your cart is empty."}
-            </h4>
-          </div>
-        </div>
+      <div style={{ padding: "40px", background: "#f1f3f6", minHeight: "100vh" }}>
+        <div style={{ maxWidth: "1200px", margin: "auto" }}>
+          <h2 style={{ marginBottom: "25px", textAlign: "center" }}>
+            Hello {auth?.user?.name || "Guest"} 👋
+          </h2>
 
-        <div className="row">
-          {/* Cart Items */}
-          <div className="col-md-8">
-            {cart?.map((p) => (
-              <div
-                key={p._id}
-                className="card mb-3 shadow-sm"
-                style={{
-                  border: "1px solid #e0e0e0",
-                  borderRadius: "12px",
-                  padding: "10px",
-                }}
-              >
-                <div className="row g-0 align-items-center">
-                  <div className="col-md-4 text-center">
-                    <img
-                      src={`/api/v1/product/product-photo/${p._id}`}
-                      alt={p.name}
-                      className="img-fluid rounded"
+          <div style={{ display: "flex", gap: "30px", flexWrap: "wrap" }}>
+
+            {/* CART ITEMS */}
+            <div style={{ flex: 2 }}>
+              {cart.map((p) => (
+                <div
+                  key={p._id}
+                  style={{
+                    display: "flex",
+                    background: "#fff",
+                    padding: "20px",
+                    marginBottom: "15px",
+                    borderRadius: "12px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                    alignItems: "center",
+                  }}
+                >
+                  <img
+                    src={`/api/v1/product/product-photo/${p._id}`}
+                    alt={p.name}
+                    style={{
+                      width: "110px",
+                      height: "110px",
+                      objectFit: "contain",
+                      marginRight: "20px",
+                    }}
+                  />
+
+                  <div style={{ flex: 1 }}>
+                    <h5 style={{ marginBottom: "8px" }}>{p.name}</h5>
+                    <p style={{ fontWeight: "600", color: "#B12704" }}>
+                      ₹ {p.price}
+                    </p>
+
+                    <button
+                      onClick={() => removeCartItem(p._id)}
                       style={{
-                        maxHeight: "120px",
-                        objectFit: "contain",
-                        padding: "10px",
+                        background: "#fff",
+                        color: "#d9534f",
+                        border: "1px solid #d9534f",
+                        padding: "6px 14px",
+                        borderRadius: "6px",
+                        cursor: "pointer",
+                        transition: "0.3s",
                       }}
-                    />
-                  </div>
-                  <div className="col-md-8">
-                    <div className="card-body">
-                      <h5 className="card-title">{p.name}</h5>
-                      <p className="card-text text-muted">
-                        {p.description?.substring(0, 60)}...
-                      </p>
-                      <p className="card-text">
-                        <strong>Price:</strong> ₹{p.price}
-                      </p>
-                      <button
-                        className="btn btn-outline-danger btn-sm"
-                        onClick={() => removeCartItem(p._id)}
-                      >
-                        Remove
-                      </button>
-                    </div>
+                    >
+                      Remove
+                    </button>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
 
-          {/* Cart Summary & Payment */}
-          <div className="col-md-4">
+            {/* SUMMARY */}
             <div
-              className="card shadow-sm p-3"
-              style={{ borderRadius: "12px", background: "#f8f9fa" }}
+              style={{
+                flex: 1,
+                background: "#fff",
+                padding: "25px",
+                borderRadius: "12px",
+                boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
+                height: "fit-content",
+              }}
             >
-              <h4 className="mb-3">Cart Summary</h4>
-              <p>
-                Total Items: <strong>{cart.length}</strong>
-              </p>
-              <hr />
-              <h5>Total Price: ₹{totalPrice}</h5>
+              <h4>Cart Summary</h4>
+              <p>Total Items: {cart.length}</p>
+              <h5 style={{ color: "#B12704" }}>Total Price: ₹ {totalPrice}</h5>
+
               <hr />
 
-              {/* Address */}
-              {auth?.user?.address ? (
-                <>
-                  <h5 className="mt-3">Delivery Address</h5>
-                  <p className="text-muted">{auth.user.address}</p>
-                  <button
-                    className="btn btn-warning btn-sm"
-                    onClick={() => navigate("/dashboard/user/profile")}
-                  >
-                    Update Address
-                  </button>
-                </>
-              ) : (
-                <div>
-                  {auth?.token ? (
-                    <button
-                      className="btn btn-warning btn-sm"
-                      onClick={() => navigate("/dashboard/user/profile")}
-                    >
-                      Add Address
-                    </button>
-                  ) : (
-                    <button
-                      className="btn btn-outline-primary btn-sm"
-                      onClick={() => navigate("/login", { state: "/cart" })}
-                    >
-                      Please login to checkout
-                    </button>
-                  )}
+              {/* ADDRESS DROPDOWN */}
+              <div
+                onClick={() => setShowAddress(!showAddress)}
+                style={{
+                  cursor: "pointer",
+                  fontWeight: "600",
+                  marginBottom: "10px",
+                }}
+              >
+                Delivery Address {showAddress ? "▲" : "▼"}
+              </div>
+
+              {showAddress && (
+                <div
+                  style={{
+                    maxHeight: "500px",
+                    overflow: "hidden",
+                    transition: "all 0.4s ease",
+                  }}
+                >
+                  {Object.keys(deliveryAddress).map((key) => (
+                    <input
+                      key={key}
+                      type="text"
+                      placeholder={key}
+                      value={deliveryAddress[key]}
+                      onChange={(e) =>
+                        setDeliveryAddress({
+                          ...deliveryAddress,
+                          [key]: e.target.value,
+                        })
+                      }
+                      style={{
+                        width: "100%",
+                        padding: "10px",
+                        marginBottom: "12px",
+                        borderRadius: "6px",
+                        border: "1px solid #ddd",
+                      }}
+                    />
+                  ))}
                 </div>
               )}
 
-              {/* Payment */}
-              <div className="mt-3">
-                {clientToken ? (
-                  <DropIn
-                    options={{
-                      authorization: clientToken,
-                      paypal: { flow: "vault" },
-                    }}
-                    onInstance={(inst) => setInstance(inst)}
-                  />
-                ) : (
-                  <p>Loading payment options...</p>
-                )}
+              <hr />
 
-                <button
-                  className="btn btn-primary w-100 mt-3"
-                  onClick={handlePayment}
-                  disabled={
-                    !clientToken || loading || !instance || !auth?.user?.address
-                  }
-                >
-                  {loading ? "Processing..." : "Make Payment"}
-                </button>
+              <h5>Payment Method</h5>
+
+              <div style={{ marginBottom: "8px" }}>
+                <input
+                  type="radio"
+                  checked={paymentMethod === "online"}
+                  onChange={() => setPaymentMethod("online")}
+                />{" "}
+                Online Payment
               </div>
+
+              <div>
+                <input
+                  type="radio"
+                  checked={paymentMethod === "cod"}
+                  onChange={() => setPaymentMethod("cod")}
+                />{" "}
+                Cash on Delivery
+              </div>
+
+              {paymentMethod === "online" && clientToken && (
+                <div style={{ marginTop: "15px" }}>
+                  <DropIn
+                    options={{ authorization: clientToken }}
+                    onInstance={(instance) =>
+                      (instanceRef.current = instance)
+                    }
+                  />
+                </div>
+              )}
+
+              <button
+                disabled={loading}
+                onClick={
+                  paymentMethod === "online"
+                    ? handlePayment
+                    : handleCODPayment
+                }
+                style={{
+                  width: "100%",
+                  padding: "14px",
+                  marginTop: "20px",
+                  background: "#FFD814",
+                  border: "none",
+                  borderRadius: "8px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                }}
+              >
+                {loading ? "Processing..." : "Place Order"}
+              </button>
             </div>
           </div>
         </div>
