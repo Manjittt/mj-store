@@ -142,7 +142,6 @@ This project supports:
 ## 👨‍💻 Author
 
 Manjeet Gupta  
-B.Tech – Computer Science  
 IIT Patna  
 MERN Stack Developer  
 
