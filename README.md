@@ -81,7 +81,7 @@ BRAINTREE_PRIVATE_KEY=your_private_key
 
 ### 1️⃣ Clone the Repository
 
-git clone https://github.com/your-username/mj-store.git  
+git clone https://github.com/Manjittt/desi-swaad-MERNstack.git  
 cd mj-store  
 
 ### 2️⃣ Install Backend Dependencies
