@@ -23,9 +23,11 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+// Use morgan for logging in development mode
 app.use(morgan("dev"));
 
 // API Routes
+
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/category", categoryRoutes);
 app.use("/api/v1/product", productRoutes);
